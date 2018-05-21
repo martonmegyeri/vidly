@@ -1,8 +1,7 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
 
-
-const Rental = mongoose.model('Rental', new mongoose.Schema({
+const rentalSchema = new mongoose.Schema({
   customer: {
     type: new mongoose.Schema({
       name: {
@@ -54,7 +53,18 @@ const Rental = mongoose.model('Rental', new mongoose.Schema({
     type: Number,
     min: 0
   }
-}));
+});
+
+
+rentalSchema.methods.return = function() {
+  this.dateReturned = new Date();
+
+  const rentingDays = Math.ceil((new Date(this.dateReturned) - new Date(this.dateOut)) / 1000 / 60 / 60 / 24);
+  this.rentalFee = rentingDays * this.movie.dailyRentalRate;
+};
+
+
+const Rental = mongoose.model('Rental', rentalSchema);
 
 
 function validateRental(rental) {
